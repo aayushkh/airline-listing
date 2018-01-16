@@ -1,0 +1,170 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="description" content="Airline JSON Parser">
+    <title>Airline Lister</title>
+    <style>
+    html, body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        text-align: center;
+        padding-top: 5%;
+        font-size: 20px;
+    }
+    </style>
+</head>
+<body>
+
+    <p><b>Enter URL for Airlines List JSON File</b><br><br></p>
+    <form name="airlineLister" method="post" id="airlinelister">
+    <input type="text" id="jsonfilename" name="jsonfilename"><br><br>
+    <input type="button" name="submit" value="Submit Query" onclick="viewJSON()"/>
+    </form>
+
+    <p id="demo"></p>
+
+  <script>
+
+
+  function	viewJSON()
+  {
+    var doc = document.getElementById("jsonfilename").value;
+    if(doc=="")
+    {
+      alert("Don't leave blank. Enter Valid JSON filename");
+    }
+    else
+    {
+      if	(window.XMLHttpRequest)
+      {
+        xmlhttp= new	XMLHttpRequest();
+      }
+      else
+      {
+        xmlhttp=new	ActiveXObject("Microsoft.XMLHTTP");
+      }
+        
+        
+        xmlhttp.open("GET",doc,false);
+        xmlhttp.send();
+        
+        if (xmlhttp.status === 404) 
+        {
+            alert("Page not found.");
+        }
+        
+        try 
+        {
+            JSON.parse(xmlhttp.responseText);
+        }
+         
+        catch (e) 
+        {
+            alert("Alert : Invalid JSON syntax in file.");
+        }
+      
+        jsonObj=	JSON.parse(xmlhttp.responseText);
+        
+        if(!(jsonObj.Mainline.Table.Row))
+        {
+          alert("No Airlines to Display(NO ROWS) ! ");
+        }
+        else
+        {
+          var html;
+          html = generateHTML(jsonObj);
+          hWin = window.open("", "Assignment4", "height=600,width=1000");
+          hWin.document.write(html); 
+          hWin.document.close();
+        }   
+    }
+  }
+
+  function generateHTML(jsonObj)
+  {
+    Mainline = jsonObj.Mainline;
+    var html_text;
+   
+    html_text="<html><head><title>JSON Parse Result</title></head><body>";
+    html_text+="<table border='2'>";
+    Table=jsonObj.Mainline.Table;
+    Header=jsonObj.Mainline.Table.Header;	//	an array of	planes
+    HeaderData=jsonObj.Mainline.Table.Header.Data;
+    html_text+="<tbody>";
+    html_text+="<tr>";
+    header_data=Object.values(HeaderData);
+
+    for(i=0;i<header_data.length;i++)
+    {
+      html_text+="<th>"+header_data[i]+"</th>";
+    }   
+    RowData=jsonObj.Mainline.Table.Row;
+    var plane_values = Object.values(RowData);
+    var plane_keys = Object.keys(RowData);  
+    //    console.log(plane_values);
+    //    console.log(plane_keys);
+    //	  output	the	rows
+    for(i=0;i<plane_values.length;i++)	
+    {
+      singlePlaneKey=plane_keys[i];	
+      singlePlaneValue=plane_values[i];
+
+//      console.log(singlePlaneValue);
+        
+        attribute = Object.keys(singlePlaneValue);
+        row = Object.values(singlePlaneValue);
+//      console.log(attribute);
+//      console.log(row);
+        html_text += "<tr>";
+        //start	a	new	row	of	the	output	table
+        for(j=0;j<row.length;j++)
+        {
+            if(attribute[j]=="Airline"||attribute[j]=="IATA"||attribute[j]=="Notes")
+            {
+                html_text += "<td>" +row[j]+ "</td>";
+            }
+            else if(attribute[j]=="HomePage")
+            {
+                html_text += "<td><a href='" +row[j]+ "'>"+row[j]+"</a></td>";    
+            }
+            else if(attribute[j]=="Plane")
+            {
+                html_text += "<td><img src='" +row[j]+ "' height='200' width='300'></td>";
+            }
+            else
+            {
+                hubsVal=Object.values(row[2]);
+                hubsKey=Object.values(row[2]);
+                html_text += "<td><ul>";
+                for(k=0;k<hubsVal.length;k++)
+                {
+                    subHubVal = hubsVal[k];
+    //                        console.log(subHubVal);
+                    for(l=0;l<subHubVal.length;l++)
+                    {
+                        if(l==0)
+                        {
+                        html_text += "<li><b>" +subHubVal[l]+ "</b></li>";
+                        }
+                        else
+                        {
+                        html_text += "<li>" +subHubVal[l]+ "</li>";
+                        }
+                    }
+                }
+            html_text += "</ul></td>";
+            }
+        }					
+    html_text += "</tr>";
+    }
+    html_text+="</tbody>";
+    html_text+="</table>";
+    html_text+="</bo"+"dy>";
+    html_text+="</ht"+"ml>";
+    return html_text;
+  }
+  </script>
+</body>
+</html>
