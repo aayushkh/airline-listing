@@ -1,4 +1,4 @@
-# Airline Testing
+# Airline Listing
 A very basic JavaScript webpage to read JSON files and display relevant details. 
 
 Note : 
